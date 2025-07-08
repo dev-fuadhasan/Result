@@ -152,6 +152,7 @@ const handler: Handler = async (event, context) => {
         statusCode: 200,
         headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          success: true,
           status: 'healthy',
           timestamp: new Date().toISOString(),
           metrics,

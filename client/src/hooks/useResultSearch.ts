@@ -89,12 +89,36 @@ export function useResultSearch() {
       return await response.json();
     },
     onSuccess: (data: ResultSearchResponse) => {
-      if (data.success && data.requestId) {
-        setCurrentRequestId(data.requestId);
-        toast({
-          title: "Search initiated",
-          description: "Fetching your result, please wait...",
-        });
+      console.log('[useResultSearch] Search response:', data);
+      
+      if (data.success) {
+        if (data.status === 'success' && data.result) {
+          // Direct result response - no polling needed
+          const resultStatus = {
+            status: 'success',
+            resultData: data.result,
+            requestId: data.requestId,
+          };
+          queryClient.setQueryData(['/api/result/status', data.requestId], resultStatus);
+          setCurrentRequestId(data.requestId);
+          toast({
+            title: "Result found!",
+            description: "Your result has been successfully retrieved.",
+          });
+        } else if (data.requestId) {
+          // Polling response - set up polling
+          setCurrentRequestId(data.requestId);
+          toast({
+            title: "Search initiated",
+            description: "Fetching your result, please wait...",
+          });
+        } else {
+          toast({
+            title: "Search failed",
+            description: data.message || "No result found",
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
           title: "Search failed",
