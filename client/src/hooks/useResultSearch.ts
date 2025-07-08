@@ -92,15 +92,19 @@ export function useResultSearch() {
       console.log('[useResultSearch] Search response:', data);
       
       if (data.success) {
-        if (data.status === 'success' && data.result) {
+        if ((data as any).status === 'success' && (data as any).result) {
           // Direct result response - no polling needed
           const resultStatus = {
             status: 'success',
-            resultData: data.result,
+            resultData: (data as any).result,
             requestId: data.requestId,
           };
-          queryClient.setQueryData(['/api/result/status', data.requestId], resultStatus);
-          setCurrentRequestId(data.requestId);
+          console.log('[useResultSearch] Setting result data:', resultStatus);
+          setCurrentRequestId(data.requestId || null);
+          // Set the query data after setting the request ID
+          setTimeout(() => {
+            queryClient.setQueryData(['/api/result/status', data.requestId], resultStatus);
+          }, 0);
           toast({
             title: "Result found!",
             description: "Your result has been successfully retrieved.",
@@ -148,6 +152,13 @@ export function useResultSearch() {
       return 2000; // Poll every 2 seconds
     },
     refetchOnWindowFocus: false,
+  });
+
+  console.log('[useResultSearch] Query state:', {
+    currentRequestId,
+    resultStatus,
+    isLoadingResult,
+    queryEnabled: !!currentRequestId,
   });
 
   // Retry search function
