@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 export function useResultSearch() {
   const [currentRequestId, setCurrentRequestId] = useState<number | null>(null);
   const [sessionToken, setSessionToken] = useState<string>('');
+  const [resultStatus, setResultStatus] = useState<ResultStatusResponse | undefined>(undefined);
   const { toast } = useToast();
 
   // Generate initial captcha
@@ -138,9 +139,6 @@ export function useResultSearch() {
       });
     },
   });
-
-  // Store result status in state instead of using query
-  const [resultStatus, setResultStatus] = useState<ResultStatusResponse | undefined>(undefined);
 
   console.log('[useResultSearch] State:', {
     currentRequestId,

@@ -46,6 +46,7 @@ export interface ResultStatusResponse {
   resultData?: ResultData;
   errorMessage?: string;
   retryCount?: number;
+  requestId?: number;
 }
 
 export interface CaptchaResponse {
