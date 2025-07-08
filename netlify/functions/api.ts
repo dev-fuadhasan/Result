@@ -99,6 +99,18 @@ class SimpleResultFetcher {
   }
 }
 
+function normalizePath(path: string): string {
+  // Remove function prefix if present
+  if (path.startsWith('/.netlify/functions/api')) {
+    path = path.replace('/.netlify/functions/api', '');
+  }
+  // Always start with a single '/'
+  if (!path.startsWith('/')) path = '/' + path;
+  // Remove trailing slash (except for root)
+  if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
+  return path;
+}
+
 const handler: Handler = async (event, context) => {
   const startTime = Date.now();
   
@@ -119,8 +131,12 @@ const handler: Handler = async (event, context) => {
     };
   }
 
-  const path = event.path.replace('/.netlify/functions/api', '');
+  // Extract and normalize the path
+  let path = normalizePath(event.path);
+  
   console.log(`[Netlify Function] ${event.httpMethod} ${path}`);
+  console.log(`[Netlify Function] Full path: ${event.path}`);
+  console.log(`[Netlify Function] Raw URL: ${event.rawUrl}`);
 
   try {
     // Health check endpoint
@@ -325,12 +341,19 @@ const handler: Handler = async (event, context) => {
 
     // 404 for unknown endpoints
     SimpleMonitoringService.recordRequest(false, Date.now() - startTime);
+    console.log(`[Netlify Function] 404 - Unknown endpoint: ${path}`);
     return {
       statusCode: 404,
       headers: { ...headers, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         success: false,
-        message: 'Endpoint not found',
+        message: `Endpoint not found: ${path}`,
+        debug: {
+          originalPath: event.path,
+          processedPath: path,
+          method: event.httpMethod,
+          rawUrl: event.rawUrl,
+        },
       }),
     };
 
