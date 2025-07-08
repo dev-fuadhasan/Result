@@ -134,7 +134,7 @@ export class ResultFetcherService {
     });
 
     // Parse form to get required fields and CSRF token
-    const $ = require('cheerio').load(formResponse.data);
+    const $ = cheerio.load(formResponse.data);
     const csrfToken = $('input[name="_token"]').val() || '';
     
     // Map our board names to the actual form values
@@ -159,16 +159,21 @@ export class ResultFetcherService {
       'jsc': 'JSC/JDC',
     };
 
-    const formData = new URLSearchParams({
-      '_token': csrfToken.toString(),
-      'exam': examMapping[params.exam] || params.exam,
-      'year': '2024', // Default to current year
-      'board': boardMapping[params.board] || params.board,
-      'result_type': 'Individual/Detailed Result',
-      'roll': params.roll,
-      'reg': params.registration,
-      'eiin': params.eiin || '',
-    });
+    const formData = new URLSearchParams();
+    if (csrfToken) {
+      formData.append('_token', csrfToken.toString());
+    }
+    formData.append('exam', examMapping[params.exam] || 'SSC/Dakhil/Equivalent');
+    formData.append('year', '2024');
+    formData.append('board', boardMapping[params.board] || 'Dhaka');
+    formData.append('result_type', 'Individual Result');
+    formData.append('roll', params.roll);
+    formData.append('reg', params.registration);
+    if (params.eiin) {
+      formData.append('eiin', params.eiin);
+    }
+
+    console.log(`[ResultFetcher] Submitting form with data:`, Object.fromEntries(formData.entries()));
 
     const response = await axios.post(`${baseUrl}/ebr.app/home/`, formData, {
       headers: {
@@ -185,30 +190,38 @@ export class ResultFetcherService {
       maxRedirects: 5,
     });
 
+    console.log(`[ResultFetcher] Response status: ${response.status}, content length: ${response.data.length}`);
+    
+    // Log a snippet of the response for debugging
+    const responseSnippet = response.data.substring(0, 500);
+    console.log(`[ResultFetcher] Response preview:`, responseSnippet);
+
     return this.parseResultHtml(response.data);
   }
 
   private static async fetchViaAlternativeEndpoint(baseUrl: string, params: FetchParams): Promise<ResultData> {
-    const response = await axios.get(`${baseUrl}/v2/result`, {
-      params: {
-        board: params.board,
-        exam: params.exam,
-        roll: params.roll,
-        reg: params.registration,
-        eiin: params.eiin || '',
-      },
+    // Try a different approach - direct result submission with different form data
+    const formData = new URLSearchParams({
+      'board': params.board,
+      'exam': params.exam,
+      'year': '2024',
+      'roll': params.roll,
+      'reg': params.registration,
+      'eiin': params.eiin || '',
+      'result_type': 'Individual',
+    });
+
+    const response = await axios.post(`${baseUrl}/ebr.app/`, formData, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; ResultChecker/1.0)',
-        'Accept': 'application/json,text/html',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Referer': `${baseUrl}/ebr.app/home/`,
       },
       timeout: 20000,
     });
 
-    if (response.headers['content-type']?.includes('application/json')) {
-      return this.parseResultJson(response.data);
-    } else {
-      return this.parseResultHtml(response.data);
-    }
+    return this.parseResultHtml(response.data);
   }
 
   private static async fetchViaScraping(baseUrl: string, params: FetchParams): Promise<ResultData> {
