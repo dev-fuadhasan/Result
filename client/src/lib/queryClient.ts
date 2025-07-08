@@ -1,5 +1,17 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+// Get the API base URL based on environment
+const getApiBaseUrl = () => {
+  if (import.meta.env.DEV) {
+    // Development: use proxy to local backend
+    return '';
+  } else {
+    // Production: use deployed backend URL
+    // You'll need to replace this with your actual deployed backend URL
+    return import.meta.env.VITE_API_URL || 'https://your-backend-url.com';
+  }
+};
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -12,7 +24,12 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const baseUrl = getApiBaseUrl();
+  const fullUrl = baseUrl + url;
+  
+  console.log(`[apiRequest] ${method} ${fullUrl}`, data ? { data } : '');
+  
+  const res = await fetch(fullUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
@@ -29,7 +46,10 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    const baseUrl = getApiBaseUrl();
+    const fullUrl = baseUrl + (queryKey[0] as string);
+    
+    const res = await fetch(fullUrl, {
       credentials: "include",
     });
 

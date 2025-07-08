@@ -4,11 +4,26 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
-// Add CORS middleware
+// Add CORS middleware with production settings
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  // In production, only allow requests from your Netlify domain
+  const allowedOrigins = [
+    'https://resultraider.netlify.app',
+    'http://localhost:5173', // Vite dev server
+    'http://localhost:3000', // Alternative dev port
+  ];
+  
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else if (process.env.NODE_ENV === 'development') {
+    // In development, allow all origins
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
   
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);
@@ -70,15 +85,14 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
+  // Use environment variable for port in production
+  const port = process.env.PORT || 5000;
   server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`Server running on port ${port} in ${process.env.NODE_ENV || 'development'} mode`);
+    log(`API available at http://localhost:${port}/api`);
   });
 })();

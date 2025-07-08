@@ -9,6 +9,35 @@ import { nanoid } from "nanoid";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Health check endpoint
+  app.get("/api/health", async (req, res) => {
+    try {
+      const cacheStats = ResultFetcherService.getCacheStats();
+      const monitoringMetrics = MonitoringService.getMetrics();
+      
+      res.json({
+        success: true,
+        status: "healthy",
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development',
+        cache: cacheStats,
+        monitoring: {
+          healthStatus: MonitoringService.getHealthStatus(),
+          successRate: MonitoringService.getSuccessRate(),
+          totalRequests: monitoringMetrics.totalRequests,
+        },
+        version: "1.0.0"
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        status: "unhealthy",
+        error: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
   // Generate captcha endpoint
   app.get("/api/captcha", async (req, res) => {
     try {
