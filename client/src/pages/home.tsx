@@ -51,6 +51,9 @@ export default function Home() {
                 This system bypasses server overload issues. Results are fetched using optimized 
                 multiple request strategies with automatic retry mechanisms.
               </p>
+              <p className="text-xs text-blue-600 mt-2 p-2 bg-blue-100 rounded">
+                <strong>Demo Mode:</strong> Test with Roll: 123456, Registration: 1234567890
+              </p>
             </div>
           </div>
         </div>

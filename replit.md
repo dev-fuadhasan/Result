@@ -98,11 +98,24 @@ External API Call → Data Parsing → Database Update → Client Response
 - PostgreSQL database instance
 - Static file serving capability
 
+## Demo Testing
+
+For testing purposes, use these demo credentials:
+- **Roll Number**: 123456
+- **Registration**: 1234567890
+- **Board**: Any board
+- **Exam**: Any exam type
+
+This will return a sample result to test the full functionality without needing real student data.
+
 ## Changelog
 
 ```
 Changelog:
-- July 08, 2025. Initial setup
+- July 08, 2025. Initial setup with SSC result checker
+- July 08, 2025. Enhanced result fetcher with real website integration
+- July 08, 2025. Added demo mode and comprehensive error handling
+- July 08, 2025. GitHub deployment configuration completed
 ```
 
 ## User Preferences
