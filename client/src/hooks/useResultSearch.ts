@@ -11,9 +11,9 @@ export function useResultSearch() {
 
   // Generate initial captcha
   const { data: captchaData, refetch: refetchCaptcha } = useQuery({
-    queryKey: ['/api/captcha', sessionToken],
+    queryKey: ['/api/captcha'],
     queryFn: async () => {
-      const response = await apiRequest('GET', `/api/captcha?session=${sessionToken}`);
+      const response = await apiRequest('GET', `/api/captcha`);
       const data: CaptchaResponse = await response.json();
       if (data.success && data.sessionToken) {
         setSessionToken(data.sessionToken);
@@ -31,7 +31,7 @@ export function useResultSearch() {
     },
     onSuccess: (data: CaptchaResponse) => {
       if (data.success) {
-        queryClient.invalidateQueries({ queryKey: ['/api/captcha'] });
+        queryClient.setQueryData(['/api/captcha'], data);
         toast({
           title: "Captcha refreshed",
           description: "Please enter the new security code",

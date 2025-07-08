@@ -42,6 +42,7 @@ export class MemStorage implements IStorage {
       retryCount: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
+      eiin: insertRequest.eiin || null,
     };
     this.resultRequests.set(id, request);
     return request;

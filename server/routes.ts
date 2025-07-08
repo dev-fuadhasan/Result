@@ -79,7 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             exam: validatedData.exam,
             roll: validatedData.roll,
             registration: validatedData.registration,
-            eiin: validatedData.eiin,
+            eiin: validatedData.eiin || undefined,
           });
 
           await storage.updateResultRequest(resultRequest.id, {
