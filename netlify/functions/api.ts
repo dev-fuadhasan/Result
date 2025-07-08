@@ -19,11 +19,19 @@ class SimpleCaptchaService {
 
   static validateCaptcha(sessionToken: string, userInput: string): boolean {
     const correctCaptcha = captchas.get(sessionToken);
-    if (!correctCaptcha) return false;
+    console.log(`[CaptchaService] Validating - SessionToken: ${sessionToken}, StoredCaptcha: ${correctCaptcha}, UserInput: ${userInput}`);
+    
+    if (!correctCaptcha) {
+      console.log(`[CaptchaService] No captcha found for session token: ${sessionToken}`);
+      return false;
+    }
     
     const isValid = correctCaptcha === userInput;
+    console.log(`[CaptchaService] Validation result: ${isValid}`);
+    
     if (isValid) {
       captchas.delete(sessionToken); // Use once
+      console.log(`[CaptchaService] Captcha consumed for session: ${sessionToken}`);
     }
     
     return isValid;
@@ -295,6 +303,10 @@ const handler: Handler = async (event, context) => {
 
         SimpleMonitoringService.recordRequest(true, Date.now() - startTime);
         
+        // Generate a new captcha for the next search
+        const newSessionToken = Date.now().toString();
+        const newCaptcha = SimpleCaptchaService.generateCaptcha(newSessionToken);
+        
         return {
           statusCode: 200,
           headers: { ...headers, 'Content-Type': 'application/json' },
@@ -303,6 +315,10 @@ const handler: Handler = async (event, context) => {
             requestId,
             status: 'success',
             result,
+            newCaptcha: {
+              captcha: newCaptcha,
+              sessionToken: newSessionToken,
+            },
           }),
         };
       } catch (error) {

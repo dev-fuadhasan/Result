@@ -37,6 +37,16 @@ export default function Home() {
   const showResult = resultStatus?.status === 'success' && resultStatus.resultData;
   const showError = resultStatus?.status === 'failed';
 
+  // Debug logging
+  console.log('[Home] Debug info:', {
+    isSearching,
+    isFormSubmitted,
+    resultStatus,
+    showLoading,
+    showResult,
+    showError,
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
