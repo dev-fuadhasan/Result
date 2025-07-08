@@ -104,6 +104,10 @@ function normalizePath(path: string): string {
   if (path.startsWith('/.netlify/functions/api')) {
     path = path.replace('/.netlify/functions/api', '');
   }
+  // Remove /api prefix if present
+  if (path.startsWith('/api')) {
+    path = path.replace('/api', '');
+  }
   // Always start with a single '/'
   if (!path.startsWith('/')) path = '/' + path;
   // Remove trailing slash (except for root)
