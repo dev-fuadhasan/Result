@@ -94,17 +94,15 @@ export function useResultSearch() {
       if (data.success) {
         if ((data as any).status === 'success' && (data as any).result) {
           // Direct result response - no polling needed
-          const resultStatus = {
+          const resultStatusData: ResultStatusResponse = {
+            success: true,
             status: 'success',
             resultData: (data as any).result,
             requestId: data.requestId,
           };
-          console.log('[useResultSearch] Setting result data:', resultStatus);
+          console.log('[useResultSearch] Setting result data:', resultStatusData);
           setCurrentRequestId(data.requestId || null);
-          // Set the query data after setting the request ID
-          setTimeout(() => {
-            queryClient.setQueryData(['/api/result/status', data.requestId], resultStatus);
-          }, 0);
+          setResultStatus(resultStatusData);
           toast({
             title: "Result found!",
             description: "Your result has been successfully retrieved.",
@@ -140,25 +138,13 @@ export function useResultSearch() {
     },
   });
 
-  // Poll result status
-  const { data: resultStatus, isLoading: isLoadingResult } = useQuery({
-    queryKey: ['/api/result/status', currentRequestId],
-    enabled: !!currentRequestId,
-    refetchInterval: (data) => {
-      // Stop polling if result is final
-      if ((data as any)?.status === 'success' || (data as any)?.status === 'failed') {
-        return false;
-      }
-      return 2000; // Poll every 2 seconds
-    },
-    refetchOnWindowFocus: false,
-  });
+  // Store result status in state instead of using query
+  const [resultStatus, setResultStatus] = useState<ResultStatusResponse | undefined>(undefined);
 
-  console.log('[useResultSearch] Query state:', {
+  console.log('[useResultSearch] State:', {
     currentRequestId,
     resultStatus,
-    isLoadingResult,
-    queryEnabled: !!currentRequestId,
+    isLoadingResult: false,
   });
 
   // Retry search function
@@ -189,7 +175,7 @@ export function useResultSearch() {
 
     // Search
     searchResult: searchMutation.mutate,
-    isSearching: searchMutation.isPending || isLoadingResult,
+    isSearching: searchMutation.isPending,
     
     // Result status
     resultStatus: resultStatus as ResultStatusResponse | undefined,
@@ -199,7 +185,7 @@ export function useResultSearch() {
     retrySearch,
     resetSearch: () => {
       setCurrentRequestId(null);
-      queryClient.removeQueries({ queryKey: ['/api/result/status'] });
+      setResultStatus(undefined);
     },
   };
 }
