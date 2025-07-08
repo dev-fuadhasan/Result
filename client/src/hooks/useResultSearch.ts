@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import type { SearchFormData, ResultData, ResultSearchResponse, ResultStatusResponse, CaptchaResponse } from '@/types/result';
@@ -103,8 +103,14 @@ export function useResultSearch() {
           };
           console.log('[useResultSearch] Setting result data:', resultStatusData);
           console.log('[useResultSearch] Raw result data:', (data as any).result);
+          
+          // Update state immediately
           setCurrentRequestId(data.requestId || null);
           setResultStatus(resultStatusData);
+          
+          // Force a re-render by updating query cache
+          queryClient.setQueryData(['resultStatus'], resultStatusData);
+          
           toast({
             title: "Result found!",
             description: "Your result has been successfully retrieved.",
@@ -145,6 +151,14 @@ export function useResultSearch() {
     resultStatus,
     isLoadingResult: false,
   });
+
+  // Debug: Log whenever resultStatus changes
+  console.log('[useResultSearch] resultStatus changed:', resultStatus);
+
+  // Monitor resultStatus changes
+  useEffect(() => {
+    console.log('[useResultSearch] useEffect - resultStatus updated:', resultStatus);
+  }, [resultStatus]);
 
   // Retry search function
   const retrySearch = useCallback((formData: SearchFormData) => {

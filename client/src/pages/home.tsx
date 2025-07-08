@@ -37,6 +37,14 @@ export default function Home() {
   const showResult = resultStatus?.status === 'success' && resultStatus.resultData;
   const showError = resultStatus?.status === 'failed';
 
+  console.log('[Home] Computed values:', {
+    showLoading,
+    showResult,
+    showError,
+    resultStatusStatus: resultStatus?.status,
+    resultStatusResultData: resultStatus?.resultData,
+  });
+
   // Debug logging
   console.log('[Home] Debug info:', {
     isSearching,
