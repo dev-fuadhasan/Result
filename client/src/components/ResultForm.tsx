@@ -14,6 +14,7 @@ import type { SearchFormData } from '@/types/result';
 const formSchema = z.object({
   board: z.string().min(1, 'Please select an education board'),
   exam: z.string().min(1, 'Please select an examination'),
+  year: z.string().min(1, 'Please select a year'),
   roll: z.string().min(1, 'Roll number is required'),
   registration: z.string().min(1, 'Registration number is required'),
   eiin: z.string().optional(),
@@ -43,6 +44,7 @@ export default function ResultForm({ onSearchStart }: ResultFormProps) {
     defaultValues: {
       board: '',
       exam: '',
+      year: '',
       roll: '',
       registration: '',
       eiin: '',
@@ -133,6 +135,37 @@ export default function ResultForm({ onSearchStart }: ResultFormProps) {
               )}
             />
           </div>
+
+          {/* Year Selection */}
+          <FormField
+            control={form.control}
+            name="year"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Year <span className="text-red-500">*</span></FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Year" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="2024">2024</SelectItem>
+                    <SelectItem value="2023">2023</SelectItem>
+                    <SelectItem value="2022">2022</SelectItem>
+                    <SelectItem value="2021">2021</SelectItem>
+                    <SelectItem value="2020">2020</SelectItem>
+                    <SelectItem value="2019">2019</SelectItem>
+                    <SelectItem value="2018">2018</SelectItem>
+                    <SelectItem value="2017">2017</SelectItem>
+                    <SelectItem value="2016">2016</SelectItem>
+                    <SelectItem value="2015">2015</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* Student Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

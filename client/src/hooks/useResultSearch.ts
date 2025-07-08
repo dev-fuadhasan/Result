@@ -86,8 +86,11 @@ export function useResultSearch() {
   // Search result mutation
   const searchMutation = useMutation({
     mutationFn: async (formData: SearchFormData) => {
+      console.log('[useResultSearch] Starting search with data:', formData);
       const response = await apiRequest('POST', '/api/result/search', formData);
-      return await response.json();
+      const data = await response.json();
+      console.log('[useResultSearch] Raw API response:', data);
+      return data;
     },
     onSuccess: (data: ResultSearchResponse) => {
       console.log('[useResultSearch] Search response:', data);

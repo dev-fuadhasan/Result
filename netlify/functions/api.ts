@@ -240,17 +240,17 @@ const handler: Handler = async (event, context) => {
     // Result search endpoints
     if (path === '/result/search' && event.httpMethod === 'POST') {
       const body = JSON.parse(event.body || '{}');
-      const { board, exam, roll, registration, eiin, captcha, sessionToken } = body;
+      const { board, exam, year, roll, registration, eiin, captcha, sessionToken } = body;
 
       // Validate required fields
-      if (!board || !exam || !roll || !registration) {
+      if (!board || !exam || !year || !roll || !registration) {
         SimpleMonitoringService.recordRequest(false, Date.now() - startTime);
         return {
           statusCode: 400,
           headers: { ...headers, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             success: false,
-            message: 'Board, exam, roll, and registration are required',
+            message: 'Board, exam, year, roll, and registration are required',
           }),
         };
       }
@@ -296,6 +296,7 @@ const handler: Handler = async (event, context) => {
         const result = await SimpleResultFetcher.fetchResult({
           board,
           exam,
+          year,
           roll,
           registration,
           eiin,

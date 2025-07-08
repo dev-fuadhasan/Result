@@ -21,6 +21,7 @@ export interface ResultData {
 export interface SearchFormData {
   board: string;
   exam: string;
+  year: string;
   roll: string;
   registration: string;
   eiin?: string;
