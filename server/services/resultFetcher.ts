@@ -83,7 +83,7 @@ export class ResultFetcherService {
         return result;
       } catch (error) {
         lastError = error as Error;
-        console.log(`[ResultFetcher] Attempt ${attempt + 1} failed:`, error.message);
+        console.log(`[ResultFetcher] Attempt ${attempt + 1} failed:`, (error as Error).message);
         
         if (attempt < this.MAX_RETRIES - 1) {
           await this.delay(this.RETRY_DELAYS[attempt]);
@@ -99,7 +99,7 @@ export class ResultFetcherService {
         return fallbackResult;
       }
     } catch (fallbackError) {
-      console.log(`[ResultFetcher] Fallback sources also failed:`, fallbackError.message);
+      console.log(`[ResultFetcher] Fallback sources also failed:`, (fallbackError as Error).message);
     }
 
     throw lastError || new Error('Failed to fetch result after all retry attempts');
@@ -343,7 +343,7 @@ export class ResultFetcherService {
           return this.parseResultJson(response.data);
         }
       } catch (error) {
-        console.log(`[ResultFetcher] Fallback URL failed: ${url}`, error.message);
+        console.log(`[ResultFetcher] Fallback URL failed: ${url}`, (error as Error).message);
       }
     }
 
@@ -495,8 +495,8 @@ export class ResultFetcherService {
       studentName: studentName || 'N/A',
       fatherName: fatherName || 'N/A',
       motherName: motherName || 'N/A',
-      roll: roll || params.roll,
-      registration: registration || params.registration,
+      roll: roll || 'N/A',
+      registration: registration || 'N/A',
       institution: institution || 'N/A',
       group: group || 'N/A',
       session: session || '2024',

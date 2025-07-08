@@ -8,7 +8,7 @@ export default function SystemStats() {
     refetchInterval: 10000, // Update every 10 seconds
   });
 
-  const stats: SystemStats = statsData?.stats || {
+  const stats: SystemStats = (statsData as any)?.stats || {
     responseTime: "1.2s",
     successRate: "98.7%",
     activeUsers: 2847,

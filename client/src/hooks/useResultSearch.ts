@@ -25,10 +25,10 @@ export function useResultSearch() {
         }
         
         if (!data.success) {
-          console.error('[useResultSearch] Captcha fetch failed:', data.message);
+          console.error('[useResultSearch] Captcha fetch failed:', (data as any).message);
           toast({
             title: "Captcha Error",
-            description: data.message || "Failed to load security code",
+            description: (data as any).message || "Failed to load security code",
             variant: "destructive",
           });
         }
@@ -67,7 +67,7 @@ export function useResultSearch() {
       } else {
         toast({
           title: "Refresh failed",
-          description: data.message || "Failed to refresh security code",
+          description: (data as any).message || "Failed to refresh security code",
           variant: "destructive",
         });
       }
@@ -118,7 +118,7 @@ export function useResultSearch() {
     enabled: !!currentRequestId,
     refetchInterval: (data) => {
       // Stop polling if result is final
-      if (data?.status === 'success' || data?.status === 'failed') {
+      if ((data as any)?.status === 'success' || (data as any)?.status === 'failed') {
         return false;
       }
       return 2000; // Poll every 2 seconds
