@@ -6,9 +6,8 @@ const getApiBaseUrl = () => {
     // Development: use proxy to local backend
     return '';
   } else {
-    // Production: use deployed backend URL
-    // You'll need to replace this with your actual deployed backend URL
-    return import.meta.env.VITE_API_URL || 'https://your-backend-url.com';
+    // Production: use Netlify Functions (same domain)
+    return '';
   }
 };
 

@@ -7,6 +7,7 @@ import LoadingIndicator from '@/components/LoadingIndicator';
 import ErrorDisplay from '@/components/ErrorDisplay';
 import ResultDisplay from '@/components/ResultDisplay';
 import SystemStats from '@/components/SystemStats';
+import { TestAPI } from '@/components/TestAPI';
 import { useResultSearch } from '@/hooks/useResultSearch';
 
 export default function Home() {
@@ -56,6 +57,11 @@ export default function Home() {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* API Test Panel (Temporary) */}
+        <div className="mb-6">
+          <TestAPI />
         </div>
 
         {/* Result Form */}
