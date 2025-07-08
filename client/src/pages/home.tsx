@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Info } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -12,12 +12,20 @@ import { useResultSearch } from '@/hooks/useResultSearch';
 
 export default function Home() {
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [debugLogs, setDebugLogs] = useState<string[]>([]);
+  
   const { 
     resultStatus, 
     isSearching, 
     retrySearch, 
     resetSearch 
   } = useResultSearch();
+
+  // Add debug logging function
+  const addDebugLog = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setDebugLogs(prev => [...prev, `[${timestamp}] ${message}`]);
+  };
 
   const handleSearchStart = () => {
     setIsFormSubmitted(true);
@@ -37,6 +45,7 @@ export default function Home() {
   const showResult = resultStatus?.status === 'success' && resultStatus.resultData;
   const showError = resultStatus?.status === 'failed';
 
+  // Debug logging
   console.log('[Home] Computed values:', {
     showLoading,
     showResult,
@@ -44,6 +53,12 @@ export default function Home() {
     resultStatusStatus: resultStatus?.status,
     resultStatusResultData: resultStatus?.resultData,
   });
+
+  // Add to debug logs
+  useEffect(() => {
+    addDebugLog(`State changed - showLoading: ${showLoading}, showResult: ${showResult}, showError: ${showError}`);
+    addDebugLog(`resultStatus: ${JSON.stringify(resultStatus)}`);
+  }, [showLoading, showResult, showError, resultStatus]);
 
   // Debug logging
   console.log('[Home] Debug info:', {
@@ -111,6 +126,39 @@ export default function Home() {
 
         {/* System Stats */}
         <SystemStats />
+
+        {/* Debug Logs Section */}
+        <div className="mt-8 p-4 bg-gray-100 rounded-lg">
+          <h3 className="text-lg font-semibold mb-4">Debug Logs</h3>
+          <div className="bg-white p-4 rounded border max-h-64 overflow-y-auto">
+            {debugLogs.length === 0 ? (
+              <p className="text-gray-500">No debug logs yet. Try searching for a result.</p>
+            ) : (
+              debugLogs.map((log, index) => (
+                <div key={index} className="text-xs font-mono text-gray-700 mb-1">
+                  {log}
+                </div>
+              ))
+            )}
+          </div>
+          <div className="mt-2 space-x-2">
+            <button 
+              onClick={() => setDebugLogs([])} 
+              className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
+            >
+              Clear Logs
+            </button>
+            <button 
+              onClick={() => {
+                addDebugLog('Manual test - Current resultStatus: ' + JSON.stringify(resultStatus));
+                addDebugLog('Manual test - showResult: ' + showResult);
+              }} 
+              className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+            >
+              Test State
+            </button>
+          </div>
+        </div>
       </main>
 
       <Footer />

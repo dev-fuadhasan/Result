@@ -111,6 +111,9 @@ export function useResultSearch() {
           // Force a re-render by updating query cache
           queryClient.setQueryData(['resultStatus'], resultStatusData);
           
+          // Force a re-render by invalidating queries
+          queryClient.invalidateQueries({ queryKey: ['resultStatus'] });
+          
           toast({
             title: "Result found!",
             description: "Your result has been successfully retrieved.",
@@ -138,6 +141,7 @@ export function useResultSearch() {
       }
     },
     onError: (error: Error) => {
+      console.error('[useResultSearch] Search error:', error);
       toast({
         title: "Search failed",
         description: error.message,
