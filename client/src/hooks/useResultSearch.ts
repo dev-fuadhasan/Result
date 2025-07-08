@@ -97,10 +97,11 @@ export function useResultSearch() {
           const resultStatusData: ResultStatusResponse = {
             success: true,
             status: 'success',
-            resultData: (data as any).result,
+            resultData: (data as any).result as ResultData,
             requestId: data.requestId,
           };
           console.log('[useResultSearch] Setting result data:', resultStatusData);
+          console.log('[useResultSearch] Raw result data:', (data as any).result);
           setCurrentRequestId(data.requestId || null);
           setResultStatus(resultStatusData);
           toast({

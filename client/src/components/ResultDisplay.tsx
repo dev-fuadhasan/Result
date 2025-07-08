@@ -8,7 +8,12 @@ interface ResultDisplayProps {
 }
 
 export default function ResultDisplay({ isVisible, resultData }: ResultDisplayProps) {
-  if (!isVisible || !resultData) return null;
+  console.log('[ResultDisplay] Props:', { isVisible, resultData });
+  
+  if (!isVisible || !resultData) {
+    console.log('[ResultDisplay] Not rendering - isVisible:', isVisible, 'resultData:', resultData);
+    return null;
+  }
 
   const handleDownloadPDF = () => {
     // TODO: Implement PDF generation

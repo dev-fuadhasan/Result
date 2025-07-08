@@ -85,6 +85,13 @@ export default function Home() {
           isVisible={!!showResult} 
           resultData={resultStatus?.resultData || null} 
         />
+        
+        {/* Debug info */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-4 p-4 bg-gray-100 rounded text-xs">
+            <pre>Debug: {JSON.stringify({ showResult, resultStatus }, null, 2)}</pre>
+          </div>
+        )}
 
         {/* Error Display */}
         <ErrorDisplay
