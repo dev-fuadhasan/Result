@@ -10,33 +10,75 @@ export function useResultSearch() {
   const { toast } = useToast();
 
   // Generate initial captcha
-  const { data: captchaData, refetch: refetchCaptcha } = useQuery({
+  const { data: captchaData, refetch: refetchCaptcha, error: captchaError, isLoading: isLoadingCaptcha } = useQuery({
     queryKey: ['/api/captcha'],
     queryFn: async () => {
-      const response = await apiRequest('GET', `/api/captcha`);
-      const data: CaptchaResponse = await response.json();
-      if (data.success && data.sessionToken) {
-        setSessionToken(data.sessionToken);
+      console.log('[useResultSearch] Fetching captcha...');
+      try {
+        const response = await apiRequest('GET', `/api/captcha`);
+        const data: CaptchaResponse = await response.json();
+        console.log('[useResultSearch] Captcha response:', data);
+        
+        if (data.success && data.sessionToken) {
+          setSessionToken(data.sessionToken);
+          console.log('[useResultSearch] Session token set:', data.sessionToken);
+        }
+        
+        if (!data.success) {
+          console.error('[useResultSearch] Captcha fetch failed:', data.message);
+          toast({
+            title: "Captcha Error",
+            description: data.message || "Failed to load security code",
+            variant: "destructive",
+          });
+        }
+        
+        return data;
+      } catch (error) {
+        console.error('[useResultSearch] Captcha fetch error:', error);
+        toast({
+          title: "Network Error",
+          description: "Failed to connect to server. Please check your connection.",
+          variant: "destructive",
+        });
+        throw error;
       }
-      return data;
     },
     refetchOnWindowFocus: false,
+    retry: 3,
+    retryDelay: 1000,
   });
 
   // Refresh captcha mutation
   const refreshCaptchaMutation = useMutation({
     mutationFn: async () => {
+      console.log('[useResultSearch] Refreshing captcha...');
       const response = await apiRequest('POST', '/api/captcha/refresh', { sessionToken });
       return await response.json();
     },
     onSuccess: (data: CaptchaResponse) => {
+      console.log('[useResultSearch] Captcha refresh response:', data);
       if (data.success) {
         queryClient.setQueryData(['/api/captcha'], data);
         toast({
           title: "Captcha refreshed",
           description: "Please enter the new security code",
         });
+      } else {
+        toast({
+          title: "Refresh failed",
+          description: data.message || "Failed to refresh security code",
+          variant: "destructive",
+        });
       }
+    },
+    onError: (error: Error) => {
+      console.error('[useResultSearch] Captcha refresh error:', error);
+      toast({
+        title: "Refresh failed",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -107,6 +149,8 @@ export function useResultSearch() {
     sessionToken,
     refreshCaptcha,
     isRefreshingCaptcha: refreshCaptchaMutation.isPending,
+    isLoadingCaptcha,
+    captchaError,
 
     // Search
     searchResult: searchMutation.mutate,

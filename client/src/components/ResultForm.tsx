@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Search, Building, RefreshCw } from 'lucide-react';
+import { Search, Building, RefreshCw, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useResultSearch } from '@/hooks/useResultSearch';
 import type { SearchFormData } from '@/types/result';
 
@@ -31,6 +32,8 @@ export default function ResultForm({ onSearchStart }: ResultFormProps) {
     sessionToken, 
     refreshCaptcha, 
     isRefreshingCaptcha,
+    isLoadingCaptcha,
+    captchaError,
     searchResult,
     isSearching 
   } = useResultSearch();
@@ -200,20 +203,34 @@ export default function ResultForm({ onSearchStart }: ResultFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Security Verification <span className="text-red-500">*</span></FormLabel>
+                  
+                  {/* Debug Info */}
+                  <div className="text-xs text-gray-500 mb-2">
+                    Session Token: {sessionToken ? `${sessionToken.substring(0, 8)}...` : 'Not set'}
+                    {isLoadingCaptcha && ' | Loading captcha...'}
+                    {captchaError && ' | Error loading captcha'}
+                  </div>
+                  
                   <div className="flex items-center space-x-4">
                     <div className="bg-white border border-gray-300 rounded-lg p-3 min-w-[120px] h-16 flex items-center justify-center">
-                      <span className="text-2xl font-bold text-primary tracking-wider">
-                        {captcha || '----'}
-                      </span>
+                      {isLoadingCaptcha ? (
+                        <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
+                      ) : captchaError ? (
+                        <AlertCircle className="w-6 h-6 text-red-500" />
+                      ) : (
+                        <span className="text-2xl font-bold text-primary tracking-wider">
+                          {captcha || '----'}
+                        </span>
+                      )}
                     </div>
                     <Button 
                       type="button" 
                       onClick={refreshCaptcha}
-                      disabled={isRefreshingCaptcha}
+                      disabled={isRefreshingCaptcha || isLoadingCaptcha}
                       className="bg-gray-600 hover:bg-gray-700"
                     >
                       <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshingCaptcha ? 'animate-spin' : ''}`} />
-                      Reload
+                      {isRefreshingCaptcha ? 'Refreshing...' : 'Reload'}
                     </Button>
                     <FormControl>
                       <Input 
@@ -221,10 +238,22 @@ export default function ResultForm({ onSearchStart }: ResultFormProps) {
                         placeholder="Enter 4 digits" 
                         maxLength={4}
                         className="flex-1"
+                        disabled={!captcha}
                         {...field} 
                       />
                     </FormControl>
                   </div>
+                  
+                  {/* Error Alert */}
+                  {captchaError && (
+                    <Alert className="mt-2">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        Failed to load security code. Please check your connection and try refreshing.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
                   <FormMessage />
                 </FormItem>
               )}
@@ -235,7 +264,7 @@ export default function ResultForm({ onSearchStart }: ResultFormProps) {
           <div className="flex flex-col sm:flex-row gap-3">
             <Button 
               type="submit" 
-              disabled={isSearching}
+              disabled={isSearching || !captcha}
               className="flex-1 bg-primary hover:bg-blue-700"
             >
               <Search className="w-4 h-4 mr-2" />
