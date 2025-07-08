@@ -181,7 +181,7 @@ const handler: Handler = async (event, context) => {
     }
 
     // Captcha endpoints
-    if (path === '/captcha') {
+    if (path === '/captcha' || path === '/captcha/refresh') {
       if (event.httpMethod === 'GET') {
         const sessionToken = Date.now().toString();
         const captcha = SimpleCaptchaService.generateCaptcha(sessionToken);
@@ -260,7 +260,10 @@ const handler: Handler = async (event, context) => {
         };
       }
 
+      console.log(`[Netlify Function] Validating captcha - SessionToken: ${sessionToken}, UserInput: ${captcha}`);
       const isValidCaptcha = SimpleCaptchaService.validateCaptcha(sessionToken, captcha);
+      console.log(`[Netlify Function] Captcha validation result: ${isValidCaptcha}`);
+      
       if (!isValidCaptcha) {
         SimpleMonitoringService.recordRequest(false, Date.now() - startTime);
         return {
@@ -269,6 +272,11 @@ const handler: Handler = async (event, context) => {
           body: JSON.stringify({
             success: false,
             message: 'Invalid security code. Please try again.',
+            debug: {
+              sessionToken,
+              userInput: captcha,
+              validationResult: isValidCaptcha,
+            },
           }),
         };
       }
